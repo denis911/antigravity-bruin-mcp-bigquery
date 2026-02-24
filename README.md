@@ -1,7 +1,5 @@
 # Bruin - Sample Pipeline
 
-Congrats! 🎉 You just created your first Bruin Pipeline!
-
 This pipeline is a simple example of a Bruin project. It demonstrates how to use the `bruin` CLI to build and run a pipeline.
 DuckDB was chosen for its simplicity. This setup assumes DuckDB is available; you can swap `duckdb.sql` asset types.
 

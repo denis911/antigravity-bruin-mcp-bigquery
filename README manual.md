@@ -36,8 +36,32 @@ repo-root/
 └── ...
 ```
 
-👉 In this case, you would run:
+👉 In this case, you would start with:
 
 ```bash
 bruin init default .
+```
+
+then check with:
+```bash
+bruin validate .
+``` 
+
+and finally run with:
+```bash
+bruin run .
+``` 
+
+As a result a new duckdb flie is created - `duckdb.db`
+Run the following to check the contents of the duckdb file:
+```bash
+duckdb duckdb.db
+``` 
+
+and see what is inside:
+
+```sql
+SELECT name, count(*) AS player_count
+FROM dataset.players
+GROUP BY 1
 ```
