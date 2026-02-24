@@ -55,7 +55,7 @@ bruin run .
 As a result a new duckdb flie is created - `duckdb.db`
 Run the following to check the contents of the duckdb file:
 ```bash
-duckdb duckdb.db
+duckdb -ui duckdb.db
 ``` 
 
 and see what is inside:
