@@ -214,3 +214,5 @@ logs/*.log
 
 # in case our duckdb database gets too big
 duckdb.db
+
+logs/queries

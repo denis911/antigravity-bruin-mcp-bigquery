@@ -2,34 +2,33 @@
 
 name: dataset.player_stats
 type: duckdb.sql
+
 materialization:
   type: table
-   
+  strategy: create+replace
+
 depends:
-   - dataset.players
+  - dataset.players
 
-
-# you can define column metadata and quality checks
-columns: 
-  - name: name 
+columns:
+  - name: name
     type: string
-    description: this column contains the player names 
-    checks: 
-      - name: not_null 
-      - name: unique 
-  - name: player_count 
-    type: int 
+    description: this column contains the player names
+    checks:
+      - name: not_null
+      - name: unique
+  - name: player_count
+    type: int
     description: the number of players with the given name
-    checks: 
-      - name: not_null 
-      - name: positive 
+    checks:
+      - name: not_null
+      - name: positive
 
-# you can also define custom checks 
 custom_checks:
-  - name: row count is greater than zero 
-    description: this check ensures that the table is not empty 
-    query: SELECT count(*) > 1 FROM dataset.player_stats
+  - name: row count is greater than zero
+    description: this check ensures that the table is not empty
     value: 1
+    query: SELECT count(*) > 1 FROM dataset.player_stats
 
 @bruin */
 
