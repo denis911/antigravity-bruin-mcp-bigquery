@@ -14,7 +14,7 @@ materialization:
   time_granularity: timestamp
 
 columns:
-  - name: VendorID
+  - name: vendor_id
     type: integer
     description: "A code indicating the TPEP vendor that provided the record."
   - name: tpep_pickup_datetime
@@ -70,15 +70,15 @@ columns:
 @bruin */
 
 SELECT 
-    t.VendorID,
+    t.vendor_id,
     t.tpep_pickup_datetime,
     t.tpep_dropoff_datetime,
     t.passenger_count,
     t.trip_distance,
-    t.RatecodeID,
+    t.ratecode_id,
     t.store_and_fwd_flag,
-    t.PULocationID,
-    t.DOLocationID,
+    t.pu_location_id,
+    t.do_location_id,
     t.payment_type,
     p.payment_type_name,
     t.fare_amount,
@@ -90,7 +90,8 @@ SELECT
     t.total_amount,
     t.congestion_surcharge,
     -- Handle the duplicate column naming collision issue noted in trips.py
-    t.Airport_fee as airport_fee_legacy,
+    t.airport_fee, 
+    -- as airport_fee_legacy,
     t.extraction_timestamp
 FROM ingestion.trips t
 LEFT JOIN ingestion.payment_lookup p ON t.payment_type = p.payment_type_id
