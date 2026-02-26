@@ -167,6 +167,15 @@ def materialize():
         return pd.DataFrame()
         
     final_df = pd.concat(all_dfs, ignore_index=True)
+    # print(final_df.head()) # DK - me debugging...
+    # print(final_df.tail()) # DK - me debugging...
+    # print(final_df.info()) # DK - me debugging...
+    df = df.rename(columns={'Airport_fee': 'airport_fee_legacy'})  
+    # Reassign to update df or I am getting an error
+    #  The error occurs during dlt's extract/normalize phase: 
+    # duplicate columns 'airport_fee' and 'Airport_fee' both normalize 
+    # to 'airport_fee' (lowercase snake_case), causing 
+    # NameNormalizationCollision since DuckDB is case-insensitive.
     return final_df
 
 
