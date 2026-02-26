@@ -1,99 +1,55 @@
-# Bruin - Sample Pipeline
+# NY Taxi Data Pipeline (Bruin & DuckDB)
 
-This pipeline is a simple example of a Bruin project. It demonstrates how to use the `bruin` CLI to build and run a pipeline.
-DuckDB was chosen for its simplicity. This setup assumes DuckDB is available; you can swap `duckdb.sql` asset types.
+This Bruin project implements an end-to-end data pipeline for ingesting, cleaning, and staging New York taxi trip data into a DuckDB database.
 
-The pipeline includes the following sample assets:
-- `dataset.players`: An ingestr asset that loads chess player data into DuckDB.
-- `dataset.player_stats`: A DuckDB SQL asset that builds a table from `dataset.players`.
-- `my_python_asset`: A Python asset that prints a message.
+## Pipeline Architecture
 
-## Setup
-This template includes a `.bruin.yml` with sample DuckDB and chess connections. You can replace or extend with your connections and environments as needed.
+The pipeline is organized into several key stages:
 
-Here's a sample `.bruin.yml` file:
+### 1. Ingestion
+- **Assets**:
+    - `ingestion.trips` ([trips.py](file:///c:/tmp/antigravity-bruin-mcp-bigquery/zoomcamp/pipeline/assets/ingestion/trips.py)): A Python asset that downloads Parquet files from the NYC Taxi & Limousine Commission (TLC) Trip Record Data CloudFront bucket.
+    - `ingestion.payment_lookup` ([payment_lookup.asset.yml](file:///c:/tmp/antigravity-bruin-mcp-bigquery/zoomcamp/pipeline/assets/ingestion/payment_lookup.asset.yml)): A seed asset that loads a local CSV ([payment_lookup.csv](file:///c:/tmp/antigravity-bruin-mcp-bigquery/zoomcamp/pipeline/assets/ingestion/payment_lookup.csv)) containing payment type descriptions.
+
+### 2. Staging
+- **Asset**:
+    - `staging.trips` ([trips.sql](file:///c:/tmp/antigravity-bruin-mcp-bigquery/zoomcamp/pipeline/assets/staging/trips.sql)): A DuckDB SQL asset that cleans, joins, and materializes the ingestion data.
+- **Key Features**:
+    - **Enrichment**: Joins raw trip records with payment names.
+    - **Collision Handling**: Renames conflicting column names (e.g., `Airport_fee` to `airport_fee_legacy`) to prevent errors in case-insensitive environments.
+    - **Incremental Processing**: Uses the `time_interval` strategy for efficient updates based on the run's time window.
+
+## Setup & Configuration
+
+### DuckDB Connection
+The project is configured to use a local DuckDB database file (`duckdb.db`). The connection is defined in `.bruin.yml` as:
 
 ```yaml
-default_environment: default
-environments:
-  default:
-    connections:
-      duckdb:
-        - name: "duckdb-default"
-          path: "duckdb.db"
-      chess:
-        - name: "chess-default"
-          players:
-            - "MagnusCarlsen"
-            - "Hikaru"
+connections:
+    duckdb:
+        - name: duckdb-default
+          path: duckdb.db
 ```
 
-You can simply switch the environment using the `--environment` flag, e.g.:
+## Running the Pipeline
 
-```shell
-bruin validate --environment production . 
+### Validation
+To ensure all assets are correctly configured and lineage is intact:
+```bash
+bruin validate
 ```
 
-## Running the pipeline
-
-bruin CLI can run the whole pipeline or any task with the downstreams:
-
-```shell
-bruin run .
+### Normal Run
+To execute the pipeline for the current window:
+```bash
+bruin run
 ```
 
-```shell
-Starting the pipeline execution...
-
-[18:42:58] Running:  my_python_asset
-[18:42:58] Running:  dataset.players
-[18:42:58] [my_python_asset] >> warning: `--no-sync` has no effect when used outside of a project
-[18:42:58] [my_python_asset] >> hello world
-[18:42:58] Finished: my_python_asset (191ms)
-⋮
-[18:43:04] Finished: dataset.player_stats:player_count:not_null (24ms)
-[18:43:04] Finished: dataset.player_stats:player_count:positive (33ms)
-[18:43:04] Finished: dataset.player_stats:name:unique (42ms)
-
-==================================================
-
-PASS my_python_asset 
-PASS dataset.players 
-PASS dataset.player_stats .....
-
-
-bruin run completed successfully in 5.439s
-
- ✓ Assets executed      3 succeeded
- ✓ Quality checks       5 succeeded
+### Initial Run (Full Refresh)
+When running the pipeline for the first time or when you need to recreate the tables from scratch in DuckDB, use the `--full-refresh` flag:
+```bash
+bruin run --full-refresh
 ```
 
-You can also run a single task:
-
-```shell
-bruin run assets/my_python_asset.py                         
-```
-
-```shell
-Starting the pipeline execution...
-
-[23:00:02] Running:  my_python_asset
-[23:00:02] >> warning: `--no-sync` has no effect when used outside of a project
-[23:00:02] >> hello world
-[23:00:02] Finished: my_python_asset (162ms)
-
-==================================================
-
-PASS my_python_asset 
-
-
-bruin run completed successfully in 162ms
-
- ✓ Assets executed      1 succeeded
-```
-
-You can optionally pass a `--downstream` flag to run the task with all of its downstreams.
-
-That's it, you are all set. Happy Building!
-
-If you want to dig deeper, jump into the [Concepts](https://getbruin.com/docs/bruin/getting-started/concepts.html) to learn more about the underlying concepts Bruin use for your data pipelines.
+---
+Happy Building! For more information on Bruin concepts, visit the [Bruin Documentation](https://getbruin.com/docs/).
