@@ -39,13 +39,13 @@ repo-root/
 └── ...
 ```
 
-👉 In this case, you would start with:
+In default case we start with chess players dataset pipeline, like so:
 
 ```bash
 uv run bruin init default .
 ```
 
-or in our case specifically for NY taxi dataset pipeline:
+but in our case specifically we use NY taxi dataset pipeline:
 
 ```bash
 uv run bruin init zoomcamp .
@@ -67,7 +67,7 @@ Run the following to check the contents of the duckdb file:
 duckdb -ui duckdb.db
 ``` 
 
-and see what is inside:
+and see what is inside - for chess players dataset it coul be:
 
 ```sql
 SELECT name, count(*) AS player_count
@@ -94,10 +94,10 @@ Or adapted to my win 11 PC:
  uv run bruin run --start-date 2022-01-01 --end-date 2023-01-01   --full-refresh --environment default "c:\tmp\antigravity-bruin-mcp-bigquery\zoomcamp\pipeline\pipeline.yml"
 ```
 
-NB - if we run it without UV - like `bruin run` - it will crush due
+NB - if I try to run it without UV - like `bruin run` - it will crush due
 to win 11 security policies. 
 
-To check the contents of the duckdb file - it has 13 months of data, 2.2 GB in size:
+To check the contents of the duckdb file - it has 12 months of data, 2.2 GB in size:
 ```bash
 duckdb -ui duckdb.db
 ``` 
@@ -106,10 +106,10 @@ and run SQL query:
 ```sql
 from duckdb.ingestion.trips
 select count(*)
--- 42722864 rows for 13 months
+-- 42722864 rows for 12 months
 ```
 
-In aggregated table we should have 365 rows (1 per day):
+In aggregated table we should have 365 rows (1 per each day of 2022):
 ```sql
 from duckdb.reports.trips_report
 select count(*)
