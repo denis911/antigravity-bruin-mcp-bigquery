@@ -1,5 +1,8 @@
 # antigravity-bruin-mcp-bigquery
+
 Using antigravity with bruin, bruin mcp and bigquery for NY taxi data pipeline
+
+## Setting up NY taxi dataset pipeline
 
 For GIT BASH use 
 ```Terminal: Select Default Profile```
@@ -24,7 +27,7 @@ uv add bruin
 
 and init bruin project as follows:
 ```bash
-bruin init
+uv run bruin init
 ```
 
 NB! Structure for single Bruin project per repo (most common):
@@ -39,17 +42,23 @@ repo-root/
 👉 In this case, you would start with:
 
 ```bash
-bruin init default .
+uv run bruin init default .
+```
+
+or in our case specifically for NY taxi dataset pipeline:
+
+```bash
+uv run bruin init zoomcamp .
 ```
 
 then check with:
 ```bash
-bruin validate .
+uv run bruin validate .
 ``` 
 
 and finally run with:
 ```bash
-bruin run .
+uv run bruin run .
 ``` 
 
 As a result a new duckdb flie is created - `duckdb.db`
@@ -65,3 +74,55 @@ SELECT name, count(*) AS player_count
 FROM dataset.players
 GROUP BY 1
 ```
+
+## Running the pipeline
+
+After full pileline is ready we can download 1 year worth of data:
+
+```bash
+uv run bruin run \
+   --start-date 2022-01-01 \   
+   --end-date 2023-01-01 \   
+   --full-refresh \
+   --environment default \
+   "c:\tmp\antigravity-bruin-mcp-bigquery\zoomcamp\pipeline\pipeline.yml"
+```
+
+Or adapted to my win 11 PC:
+
+```bash
+ uv run bruin run --start-date 2022-01-01 --end-date 2023-01-01   --full-refresh --environment default "c:\tmp\antigravity-bruin-mcp-bigquery\zoomcamp\pipeline\pipeline.yml"
+```
+
+NB - if we run it without UV - like `bruin run` - it will crush due
+to win 11 security policies. 
+
+To check the contents of the duckdb file - it has 13 months of data, 2.2 GB in size:
+```bash
+duckdb -ui duckdb.db
+``` 
+
+and run SQL query:
+```sql
+from duckdb.ingestion.trips
+select count(*)
+-- 42722864 rows for 13 months
+```
+
+In aggregated table we should have 365 rows (1 per day):
+```sql
+from duckdb.reports.trips_report
+select count(*)
+-- 365 rows
+``` 
+-- as we have aggregated revenue and trip distance per day.
+
+We may also check which year/months were aggregated: 
+```sql
+from duckdb.reports.trips_report
+select  year(pickup_date),
+   month(pickup_date),
+   sum(total_revenue) as revenue_per_month
+group by 1, 2
+-- 12 months in 2022, total revenue per month
+``` 
