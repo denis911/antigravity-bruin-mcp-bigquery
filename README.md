@@ -31,6 +31,48 @@ connections:
           path: duckdb.db
 ```
 
+### BigQuery Connection
+To use Google BigQuery instead of DuckDB, add a `google_cloud_platform` connection to your `.bruin.yml` file. Bruin supports several authentication methods:
+
+#### Option 1: Application Default Credentials (ADC)
+Recommended for local development if you have the Google Cloud SDK installed.
+```yaml
+connections:
+    google_cloud_platform:
+        - name: "gcp-default"
+          project_id: "your-gcp-project-id"
+          location: "US" # or your region
+          use_application_default_credentials: true
+```
+Run `gcloud auth application-default login` to authenticate.
+
+#### Option 2: Service Account File
+Point to a JSON key file on your filesystem.
+```yaml
+connections:
+    google_cloud_platform:
+        - name: "gcp-default"
+          project_id: "your-gcp-project-id"
+          service_account_file: "/path/to/service-account.json"
+```
+
+#### Option 3: Inline Service Account JSON
+Embed the JSON key directly (useful for CI/CD environments).
+```yaml
+connections:
+    google_cloud_platform:
+        - name: "gcp-default"
+          project_id: "your-gcp-project-id"
+          service_account_json: |
+            {
+              "type": "service_account",
+              ...
+            }
+```
+
+> [!TIP]
+> After setting up the connection, you can switch the default connection in `pipeline/pipeline.yml` by changing `duckdb: duckdb-default` to `bigquery: gcp-default`.
+
 ## Running the Pipeline
 
 ### Validation
